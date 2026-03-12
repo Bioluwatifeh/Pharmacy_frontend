@@ -1,6 +1,8 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 
 import Login from "../pages/Login";
+import Register from "../pages/Register";
+
 import Medicines from "../pages/Medicines";
 import Orders from "../pages/Orders";
 import MyOrders from "../pages/MyOrders";
@@ -14,32 +16,66 @@ function AppRoutes() {
 
   const token = localStorage.getItem("token");
 
-  if (!token) {
-    return <Login />;
-  }
-
   return (
+
     <Routes>
 
-      <Route path="/" element={<Medicines />} />
+      {/* Public routes */}
 
-      <Route path="/medicines" element={<Medicines />} />
+      <Route
+        path="/"
+        element={token ? <Navigate to="/medicines" /> : <Login />}
+      />
 
-      <Route path="/create-order" element={<CreateOrder />} />
+      <Route
+        path="/register"
+        element={token ? <Navigate to="/medicines" /> : <Register />}
+      />
 
-      <Route path="/orders" element={<Orders />} />
+      {/* Protected routes */}
 
-      <Route path="/my-orders" element={<MyOrders />} />
+      <Route
+        path="/medicines"
+        element={token ? <Medicines /> : <Navigate to="/" />}
+      />
 
-      <Route path="/add-medicine" element={<AddMedicine />} />
+      <Route
+        path="/create-order"
+        element={token ? <CreateOrder /> : <Navigate to="/" />}
+      />
 
-      <Route path="/edit-medicine/:id" element={<EditMedicine />} />
+      <Route
+        path="/orders"
+        element={token ? <Orders /> : <Navigate to="/" />}
+      />
 
-      <Route path="/users" element={<Users />} />
+      <Route
+        path="/my-orders"
+        element={token ? <MyOrders /> : <Navigate to="/" />}
+      />
 
-      <Route path="/dashboard" element={<Dashboard />} />
+      <Route
+        path="/add-medicine"
+        element={token ? <AddMedicine /> : <Navigate to="/" />}
+      />
+
+      <Route
+        path="/edit-medicine/:id"
+        element={token ? <EditMedicine /> : <Navigate to="/" />}
+      />
+
+      <Route
+        path="/users"
+        element={token ? <Users /> : <Navigate to="/" />}
+      />
+
+      <Route
+        path="/dashboard"
+        element={token ? <Dashboard /> : <Navigate to="/" />}
+      />
 
     </Routes>
+
   );
 }
 

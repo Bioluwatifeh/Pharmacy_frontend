@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
+import { useNavigate } from 'react-router-dom';
 
 /* ─── Role config ──────────────────────────────────────────── */
 const ROLE_CONFIG = {
@@ -58,7 +59,7 @@ function Navbar() {
     setMenuOpen(false);
     navigate("/");
   };
-  
+
   const navItems = [
     user?.role === "admin" ? { to: "/dashboard", label: "Dashboard", icon: "📊" } : null,
     { to: "/medicines", label: "Medicines", icon: "💊" },

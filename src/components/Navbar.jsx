@@ -4,7 +4,7 @@ import { Link, useLocation } from "react-router-dom";
 /* ─── Role config ──────────────────────────────────────────── */
 const ROLE_CONFIG = {
   admin:             { bg: "#faf5ff", border: "#e9d5ff", color: "#6b21a8", icon: "👑", label: "Admin" },
-  pharmacist:        { bg: "#f0fdf6", border: "#bbf7d0", color: "#14532d", icon: "💊", label: "Pharmacist" },
+  pharmacist:         { bg: "#f0fdf6", border: "#bbf7d0", color: "#14532d", icon: "💊", label: "Pharmacist" },
   inventory_manager: { bg: "#eff6ff", border: "#bfdbfe", color: "#1e3a8a", icon: "📦", label: "Inv. Manager" },
   wholesale_customer:{ bg: "#fef9c3", border: "#fde68a", color: "#854d0e", icon: "🛒", label: "Customer" },
 };
@@ -48,33 +48,32 @@ function NavLink({ to, label, icon }) {
 function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
   const user     = JSON.parse(localStorage.getItem("user"));
   const initials = user?.name?.split(" ").map(w => w[0]).slice(0, 2).join("").toUpperCase() || "?";
 
   const logout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
-    window.location.reload();
+    setMenuOpen(false);
+    navigate("/");
   };
-
+  
   const navItems = [
-    user?.role === "admin"                                          ? { to: "/dashboard",    label: "Dashboard",    icon: "📊" } : null,
-    { to: "/medicines",    label: "Medicines",    icon: "💊" },
+    user?.role === "admin" ? { to: "/dashboard", label: "Dashboard", icon: "📊" } : null,
+    { to: "/medicines", label: "Medicines", icon: "💊" },
     { to: "/create-order", label: "Create Order", icon: "🛒" },
-    (user?.role === "admin" || user?.role === "pharmacist")        ? { to: "/orders",        label: "Orders",       icon: "📋" } : null,
-    (user?.role === "admin" || user?.role === "inventory_manager") ? { to: "/add-medicine",  label: "Add Medicine", icon: "➕" } : null,
-    user?.role === "admin"                                          ? { to: "/users",         label: "Staff",        icon: "👥" } : null,
-    user?.role === "wholesale_customer"                             ? { to: "/my-orders",     label: "My Orders",    icon: "📦" } : null,
+    (user?.role === "admin" || user?.role === "pharmacist") ? { to: "/orders", label: "Orders", icon: "📋" } : null,
+    (user?.role === "admin" || user?.role === "inventory_manager") ? { to: "/add-medicine", label: "Add Medicine", icon: "➕" } : null,
+    user?.role === "admin" ? { to: "/users", label: "Staff", icon: "👥" } : null,
+    user?.role === "wholesale_customer" ? { to: "/my-orders", label: "My Orders", icon: "📦" } : null,
   ].filter(Boolean);
 
   return (
     <>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=DM+Sans:wght@400;500;600&display=swap');
-
         .th-hamburger { display: none !important; }
-
-        /* Drawer always rendered in DOM, hidden via visibility/opacity */
         .th-mobile-drawer {
           display: flex; flex-direction: column; gap: 4px;
           position: fixed; top: 56px; left: 0; right: 0;
@@ -85,16 +84,8 @@ function Navbar() {
           pointer-events: none; visibility: hidden;
           transition: transform 0.2s ease, opacity 0.2s ease, visibility 0.2s;
         }
-        .th-mobile-drawer.open {
-          transform: translateY(0); opacity: 1;
-          pointer-events: all; visibility: visible;
-        }
-
-        /* Hide drawer entirely on desktop */
-        @media (min-width: 768px) {
-          .th-mobile-drawer { display: none !important; }
-        }
-
+        .th-mobile-drawer.open { transform: translateY(0); opacity: 1; pointer-events: all; visibility: visible; }
+        @media (min-width: 768px) { .th-mobile-drawer { display: none !important; } }
         @media (max-width: 767px) {
           .th-desktop-nav  { display: none !important; }
           .th-hamburger    { display: flex !important; }
@@ -102,11 +93,7 @@ function Navbar() {
           .th-nav-divider  { display: none !important; }
           .th-logout-label { display: none !important; }
         }
-
-        @media (min-width: 768px) and (max-width: 1023px) {
-          .th-user-name { display: none !important; }
-        }
-
+        @media (min-width: 768px) and (max-width: 1023px) { .th-user-name { display: none !important; } }
         .th-mlink {
           display: flex; align-items: center; gap: 12px;
           padding: 11px 14px; border-radius: 10px;
@@ -124,19 +111,29 @@ function Navbar() {
         background: "rgba(255,255,255,0.96)", backdropFilter: "blur(12px)",
         borderBottom: "1.5px solid #e5e7eb",
         padding: "0 clamp(16px, 4vw, 32px)",
-        height: "clamp(56px, 8vw, 64px)",
+        height: "64px",
         display: "flex", alignItems: "center",
         justifyContent: "space-between", gap: "12px",
         position: "sticky", top: 0, zIndex: 100,
         boxShadow: "0 1px 8px rgba(0,0,0,0.05)"
       }}>
+        
+        {/* BRAND / LOGO SECTION */}
+        <Link to="/" style={{ display: "flex", alignItems: "center", gap: "10px", textDecoration: "none", flexShrink: 0 }}>
+          <div style={{ width: "36px", height: "36px", background: "#0D6E4F", borderRadius: "10px", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "18px", boxShadow: "0 4px 10px rgba(13,110,79,0.2)" }}>
+            💊
+          </div>
+          <span style={{ fontFamily: "'Playfair Display', serif", fontSize: "19px", fontWeight: 700, color: "#0D6E4F", letterSpacing: "-0.5px" }}>
+            Tifeh<span style={{ color: "#16a34a" }}>Health</span>
+          </span>
+        </Link>
 
-        {/* Desktop nav */}
-        <nav className="th-desktop-nav" style={{ display: "flex", alignItems: "center", gap: "2px", flex: 1, justifyContent: "center", flexWrap: "wrap" }}>
+        {/* Desktop nav (Center) */}
+        <nav className="th-desktop-nav" style={{ display: "flex", alignItems: "center", gap: "2px", flex: 1, justifyContent: "center" }}>
           {navItems.map(i => <NavLink key={i.to} to={i.to} label={i.label} icon={i.icon} />)}
         </nav>
 
-        {/* Right side */}
+        {/* Right side (User/Logout) */}
         <div style={{ display: "flex", alignItems: "center", gap: "10px", flexShrink: 0 }}>
           <div style={{ width: "34px", height: "34px", borderRadius: "50%", background: "linear-gradient(135deg,#0D6E4F,#16a34a)", display: "flex", alignItems: "center", justifyContent: "center", color: "white", fontWeight: 700, fontSize: "13px", flexShrink: 0 }}>{initials}</div>
           <div className="th-user-name" style={{ lineHeight: 1.2 }}>
@@ -159,7 +156,6 @@ function Navbar() {
 
       {/* Mobile drawer */}
       <div className={`th-mobile-drawer${menuOpen ? " open" : ""}`}>
-        {/* User row */}
         <div style={{ display: "flex", alignItems: "center", gap: "10px", padding: "10px 14px", marginBottom: "4px" }}>
           <div style={{ width: "36px", height: "36px", borderRadius: "50%", background: "linear-gradient(135deg,#0D6E4F,#16a34a)", display: "flex", alignItems: "center", justifyContent: "center", color: "white", fontWeight: 700, fontSize: "13px" }}>{initials}</div>
           <div>
@@ -168,7 +164,6 @@ function Navbar() {
           </div>
         </div>
         <div className="th-mdivider" />
-
         {navItems.map(item => {
           const isActive = location.pathname === item.to || location.pathname.startsWith(item.to + "/");
           return (
@@ -179,14 +174,12 @@ function Navbar() {
             </Link>
           );
         })}
-
         <div className="th-mdivider" />
         <button onClick={logout} className="th-mlink th-mlink-logout" style={{ color: "#dc2626" }}>
           <span style={{ fontSize: "18px", width: "26px", textAlign: "center" }}>🚪</span> Logout
         </button>
       </div>
 
-      {/* Backdrop */}
       {menuOpen && <div onClick={() => setMenuOpen(false)} style={{ position: "fixed", inset: 0, zIndex: 98, background: "rgba(0,0,0,0.18)" }} />}
     </>
   );

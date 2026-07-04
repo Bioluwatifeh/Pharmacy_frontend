@@ -43,15 +43,35 @@ function Medicines() {
     catch(err) { console.log(err); } finally { setLoading(false); }
   };
 
-  const deleteMedicine = async (id) => {
-    if (!window.confirm("Delete this medicine?")) return;
-    try { await API.delete(`/medicines/${id}`, { headers: { Authorization:`Bearer ${token}` } }); fetchMedicines(); }
-    catch(err) { alert("Delete failed"); }
-  };
+ const deleteMedicine = async (id) => {
 
-  const inStock    = medicines.filter(m => m.stock_quantity > 10).length;
-  const lowStock   = medicines.filter(m => m.stock_quantity > 0 && m.stock_quantity <= 10).length;
-  const outOfStock = medicines.filter(m => m.stock_quantity === 0).length;
+  const token = localStorage.getItem("token");
+
+  try {
+
+    await API.delete(`/medicines/${id}`, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+
+    alert("Medicine deleted");
+
+    // refresh list
+    fetchMedicines();
+
+  } catch (err) {
+
+    console.log(err);
+    alert("Delete failed");
+
+  }
+
+};
+
+  const inStock    = medicines.filter(m => m.stock_units > 100).length;
+const lowStock   = medicines.filter(m => m.stock_units > 0 && m.stock_units <= 100).length;
+const outOfStock = medicines.filter(m => m.stock_units === 0).length;
 
   return (
     <div style={{ minHeight:"100vh", background:"linear-gradient(145deg,#f0fdf6 0%,#f8fafc 60%,#eff6ff 100%)", fontFamily:"'DM Sans',sans-serif" }}>

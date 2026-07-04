@@ -31,7 +31,7 @@ function StatusBadge({ status }) {
   return <span style={{ display:"inline-flex", alignItems:"center", gap:"5px", padding:"4px 10px", borderRadius:"99px", fontSize:"12px", fontWeight:600, fontFamily:"'DM Sans',sans-serif", background:s.bg, color:s.c, whiteSpace:"nowrap" }}><span style={{ width:"6px", height:"6px", borderRadius:"50%", background:s.dot, flexShrink:0 }} />{s.l}</span>;
 }
 
-function OrderCard({ order, updateStatus }) {
+function OrderCard({ order, updateStatus, deleteOrder }) {
   const [expanded, setExpanded] = useState(false);
   const [updating, setUpdating] = useState(false);
   const total = order.order_items?.reduce((s,i)=>s+Number(i.price??0)*i.quantity,0);
@@ -87,6 +87,17 @@ function OrderCard({ order, updateStatus }) {
                 </button>
               )) : <span style={{ fontSize:"12px", color:"#9ca3af" }}>No further actions</span>}
             </div>
+              
+                <button
+              onClick={()=>{
+                if(!window.confirm("Delete this order?")) return;
+                deleteOrder(order.id);
+              }}
+              style={{ background:"red", color:"white" }}
+            >
+              🗑 Delete
+            </button>
+
             {total>0 && <div style={{ display:"flex", alignItems:"center", gap:"8px" }}><span style={{ fontSize:"12px", color:"#6b7280", fontWeight:500 }}>Total</span><span style={{ fontFamily:"'Playfair Display',serif", fontSize:"19px", fontWeight:700, color:"#0D6E4F" }}>₦{total.toLocaleString()}</span></div>}
           </div>
         </div>
@@ -101,9 +112,34 @@ function Orders() {
   const [loading, setLoading] = useState(true);
   const token = localStorage.getItem("token");
 
-  useEffect(() => { fetchOrders(); }, []);
-  const fetchOrders = async () => { setLoading(true); try { const r = await API.get("/orders",{headers:{Authorization:`Bearer ${token}`}}); setOrders(r.data); } catch(e){console.log(e);} finally{setLoading(false);} };
+  useEffect(() => {
+    fetchOrders(true);
+    const interval = setInterval(() => fetchOrders(false), 5000);
+    return () => clearInterval(interval);
+  }, []);
+  const fetchOrders = async (showLoading = false) => {
+    if (showLoading) setLoading(true);
+    try {
+      const r = await API.get("/orders", { headers: { Authorization: `Bearer ${token}` } });
+      // Sort newest first
+      const sorted = (r.data || []).slice().sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+      setOrders(sorted);
+    } catch(e) { console.log(e); }
+    finally { if (showLoading) setLoading(false); }
+  };
+  
   const updateStatus = async (id, status) => { try { await API.put(`/orders/${id}/status`,{status},{headers:{Authorization:`Bearer ${token}`}}); fetchOrders(); } catch(e){alert("Status update failed");} };
+    const deleteOrder = async (id)=>{
+    try{
+      await API.delete(`/orders/${id}`,{
+        headers:{Authorization:`Bearer ${token}`}
+      });
+      fetchOrders();
+    }catch{
+      alert("Delete failed");
+    }
+  };
+
 
   const filterKeys = ["all","pending","preparing","ready_for_pickup","completed"];
   const filterLabels = { all:"All", pending:"Pending", preparing:"Preparing", ready_for_pickup:"Ready", completed:"Completed" };
@@ -132,7 +168,7 @@ function Orders() {
           ? <div style={{ textAlign:"center", padding:"60px 0", color:"#9ca3af" }}><div style={{ fontSize:"28px", marginBottom:"10px" }}>⏳</div>Loading…</div>
           : filtered.length===0
             ? <div style={{ textAlign:"center", padding:"60px 0", color:"#9ca3af" }}><div style={{ fontSize:"36px", marginBottom:"10px" }}>📋</div><div style={{ fontWeight:500 }}>No orders found</div></div>
-            : <div style={{ display:"flex", flexDirection:"column", gap:"10px" }}>{filtered.map(o=><OrderCard key={o.id} order={o} updateStatus={updateStatus} />)}</div>
+            : <div style={{ display:"flex", flexDirection:"column", gap:"10px" }}>{filtered.map(o=><OrderCard key={o.id} order={o} updateStatus={updateStatus}  deleteOrder={deleteOrder} />)}</div>
         }
       </main>
     </div>

@@ -1,5 +1,15 @@
 import { Routes, Route, Navigate } from "react-router-dom";
-// ... your imports stay the same
+import Login from "../pages/Login";
+import Register from "../pages/Register";
+
+import Medicines from "../pages/Medicines";
+import Orders from "../pages/Orders";
+import MyOrders from "../pages/MyOrders";
+import CreateOrder from "../pages/CreateOrder";
+import AddMedicine from "../pages/AddMedicine";
+import EditMedicine from "../pages/EditMedicine";
+import Users from "../pages/Users";
+import Dashboard from "../pages/Dashboard";
 
 function AppRoutes() {
   // 🗑️ REMOVE: const token = localStorage.getItem("token");

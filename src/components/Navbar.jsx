@@ -60,7 +60,7 @@ function Navbar() {
   
   // 2. Clear React state immediately so components know they are logged out
   // Example: setAuth(false) or setUser(null) depending on your setup
-  setUser(null); 
+  
 
   // 3. UI Cleanup & Redirect
   setMenuOpen(false);

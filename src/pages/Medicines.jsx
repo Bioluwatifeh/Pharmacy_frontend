@@ -26,48 +26,85 @@ function Medicines() {
   const [medicines, setMedicines] = useState([]);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
-  const token = localStorage.getItem("token");
-  const user  = JSON.parse(localStorage.getItem("user"));
+  
+  // Parse the user details safely from localStorage
+  const user = JSON.parse(localStorage.getItem("user"));
 
-  useEffect(() => { fetchMedicines(); }, []);
+  useEffect(() => {
+    const currentToken = localStorage.getItem("token");
+    
+    // 🛑 GUARD: If no token exists (e.g., just logged out), stop immediately!
+    if (!currentToken) {
+      setLoading(false);
+      return;
+    }
+    
+    fetchMedicines();
+  }, []);
 
   const fetchMedicines = async () => {
+    const token = localStorage.getItem("token");
+    
+    // 🛑 GUARD: Do not ping backend if token is gone
+    if (!token) return;
+
     setLoading(true);
-    try { const res = await API.get("/medicines", { headers: { Authorization:`Bearer ${token}` } }); setMedicines(res.data); }
-    catch(err) { console.log(err); } finally { setLoading(false); }
+    try { 
+      const res = await API.get("/medicines", { 
+        headers: { Authorization: `Bearer ${token}` } 
+      }); 
+      setMedicines(res.data); 
+    }
+    catch (err) { 
+      console.log(err); 
+    } finally { 
+      setLoading(false); 
+    }
   };
 
   const searchMedicine = async () => {
+    const token = localStorage.getItem("token");
+    
+    // 🛑 GUARD: Do not ping backend if token is gone
+    if (!token) return;
+
     setLoading(true);
-    try { const res = await API.get(`/medicines/search?q=${search}`, { headers: { Authorization:`Bearer ${token}` } }); setMedicines(res.data); }
-    catch(err) { console.log(err); } finally { setLoading(false); }
+    try { 
+      const res = await API.get(`/medicines/search?q=${search}`, { 
+        headers: { Authorization: `Bearer ${token}` } 
+      }); 
+      setMedicines(res.data); 
+    }
+    catch (err) { 
+      console.log(err); 
+    } finally { 
+      setLoading(false); 
+    }
   };
 
- const deleteMedicine = async (id) => {
+  const deleteMedicine = async (id) => {
+    const token = localStorage.getItem("token");
+    
+    // 🛑 GUARD: Prevent delete attempt if unauthorized
+    if (!token) {
+      alert("You must be logged in to delete items.");
+      return;
+    }
 
-  const token = localStorage.getItem("token");
+    try {
+      await API.delete(`/medicines/${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
 
-  try {
-
-    await API.delete(`/medicines/${id}`, {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
-    });
-
-    alert("Medicine deleted");
-
-    // refresh list
-    fetchMedicines();
-
-  } catch (err) {
-
-    console.log(err);
-    alert("Delete failed");
-
-  }
-
-};
+      alert("Medicine deleted");
+      fetchMedicines(); // Refresh the inventory list gracefully
+    } catch (err) {
+      console.log(err);
+      alert("Delete failed");
+    }
+  };
 
   const inStock    = medicines.filter(m => m.stock_units > 100).length;
 const lowStock   = medicines.filter(m => m.stock_units > 0 && m.stock_units <= 100).length;

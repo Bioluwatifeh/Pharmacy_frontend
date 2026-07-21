@@ -54,18 +54,17 @@ function Navbar() {
   const initials = user?.name?.split(" ").map(w => w[0]).slice(0, 2).join("").toUpperCase() || "?";
 
   const logout = () => {
-  // 1. Clear tokens and user data from storage
-  localStorage.removeItem("token");
-  localStorage.removeItem("user");
-  
-  // 2. Clear React state immediately so components know they are logged out
-  // Example: setAuth(false) or setUser(null) depending on your setup
-  
+    // 1. Clear tokens and user data from storage
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
 
-  // 3. UI Cleanup & Redirect
-  setMenuOpen(false);
-  navigate("/");
-};
+    // 2. Tell App.jsx to re-check auth state so it drops the Navbar immediately
+    window.dispatchEvent(new Event("auth-change"));
+
+    // 3. UI Cleanup & Redirect
+    setMenuOpen(false);
+    navigate("/", { replace: true });
+  };
 
   const navItems = [
     user?.role === "admin" ? { to: "/dashboard", label: "Dashboard", icon: "📊" } : null,

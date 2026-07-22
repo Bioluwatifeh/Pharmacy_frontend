@@ -52,16 +52,7 @@ const CSS = `
     .co-grid { grid-template-columns: 1fr; }
   }
 `;
-function getUnitPrice(item) {
-  const unitPrice      = Number(item.price) || 0;
-  const unitsPerPack   = Number(item.units_per_pack)   || 1;
-  const packsPerCarton = Number(item.packs_per_carton) || 1;
- 
-  if (item.unit_type === "carton") return unitPrice * unitsPerPack * packsPerCarton;
-  if (item.unit_type === "pack")   return unitPrice * unitsPerPack;
-  return unitPrice;  // "unit"
-}
- 
+
 // Human-readable label for unit type dropdown
 function unitLabel(item) {
   if (item.unit_type === "carton") return item.carton_name || "Carton";
@@ -106,25 +97,6 @@ function MedCard({ med, onAdd, inCart }) {
   );
 }
 
-function formatStock(med) {
-
-  let units = med.stock_units || 0;
-
-  const unitsPerPack = med.units_per_pack || 1;
-  const packsPerCarton = med.packs_per_carton || 1;
-
-  const unitsPerCarton = unitsPerPack * packsPerCarton;
-
-  const cartons = Math.floor(units / unitsPerCarton);
-  units = units % unitsPerCarton;
-
-  const packs = Math.floor(units / unitsPerPack);
-  units = units % unitsPerPack;
-
-  return `${cartons} carton(s), ${packs} pack(s), ${units} ${med.unit_name || "unit"}(s)`;
-}
-
-
 function CreateOrder() {
   const [medicines, setMedicines] = useState([]);
   const [cart, setCart] = useState([]);
@@ -159,13 +131,19 @@ function CreateOrder() {
     setCart(cart.filter(i => i.id !== id));
   };
 
+  // ✅ Single source of truth for pricing by unit_type
   const getUnitPrice = (item) => {
-    if (item.unit_type === "carton") return item.price * (item.units_per_pack || 1) * (item.packs_per_carton || 1);
-    if (item.unit_type === "pack") return item.price * (item.units_per_pack || 1);
-    return item.price;
+    const unitPrice      = Number(item.price) || 0;
+    const unitsPerPack   = Number(item.units_per_pack)   || 1;
+    const packsPerCarton = Number(item.packs_per_carton) || 1;
+
+    if (item.unit_type === "carton") return unitPrice * unitsPerPack * packsPerCarton;
+    if (item.unit_type === "pack")   return unitPrice * unitsPerPack;
+    return unitPrice; // "unit"
   };
 
-  const total = cart.reduce((sum, i) => sum + i.price * i.quantity, 0);
+  // ✅ FIXED: total now respects unit_type via getUnitPrice
+  const total = cart.reduce((sum, i) => sum + getUnitPrice(i) * i.quantity, 0);
 
   const placeOrder = async () => {
     setLoading(true);
@@ -173,7 +151,10 @@ function CreateOrder() {
       await API.post("/orders", {
         customer_id: user.id,
         items: cart.map(i => ({
-          medicine_id: i.id, quantity: i.quantity, unit_type: i.unit_type, price: i.price
+          medicine_id: i.id,
+          quantity: i.quantity,
+          unit_type: i.unit_type,
+          price: getUnitPrice(i) // ✅ FIXED: send the correct per-unit-type price, not raw i.price
         }))
       }, { headers: { Authorization: `Bearer ${token}` } });
       alert("Order placed successfully");
@@ -250,6 +231,11 @@ function CreateOrder() {
                         <span style={{ fontWeight: 600, fontSize: "14px", minWidth: "20px", textAlign: "center" }}>{item.quantity}</span>
                         <button className="qty-btn" onClick={() => updateQty(item.id, item.quantity + 1)}>+</button>
                       </div>
+                    </div>
+
+                    {/* ✅ Shows the actual line total for this item at its selected unit_type */}
+                    <div style={{ textAlign: "right", fontSize: "12.5px", color: "#6b7280" }}>
+                      {item.quantity} × {unitLabel(item)} = ₦{(getUnitPrice(item) * item.quantity).toLocaleString()}
                     </div>
                   </div>
                 ))}

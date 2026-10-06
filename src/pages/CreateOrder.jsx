@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import API from "../api/api";
 
 const CSS = `
@@ -28,6 +28,63 @@ const CSS = `
     margin-top: 5px;
   }
 
+  /* Search */
+  .co-search-wrapper {
+    position: relative;
+    margin-bottom: 28px;
+  }
+
+  .co-search {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 15px 45px 15px 48px;
+    border: 1.5px solid #e5e7eb;
+    border-radius: 14px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    outline: none;
+    background: #fff;
+    transition: all 0.2s ease;
+  }
+
+  .co-search:focus {
+    border-color: #0D6E4F;
+    box-shadow: 0 0 0 3px rgba(13, 110, 79, 0.08);
+  }
+
+  .co-search-icon {
+    position: absolute;
+    left: 17px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 18px;
+    color: #9ca3af;
+    pointer-events: none;
+  }
+
+  .co-search-clear {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    border: none;
+    background: transparent;
+    color: #9ca3af;
+    cursor: pointer;
+    font-size: 18px;
+  }
+
+  .co-search-clear:hover {
+    color: #374151;
+  }
+
+  .co-search-status {
+    margin-top: 8px;
+    font-size: 12px;
+    color: #6b7280;
+  }
+
+  /* Layout */
   .co-layout {
     display: grid;
     grid-template-columns: 1fr 380px;
@@ -35,73 +92,29 @@ const CSS = `
     align-items: start;
   }
 
-  /* SEARCH */
-
-  .co-search-wrapper {
-    position: relative;
-    margin-bottom: 18px;
+  .co-products-section {
+    min-width: 0;
   }
 
-  .co-search-input {
-    width: 100%;
-    box-sizing: border-box;
-    padding: 14px 48px 14px 45px;
-    border: 1.5px solid #e5e7eb;
-    border-radius: 12px;
-    background: #fff;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 14px;
-    color: #111827;
-    outline: none;
-    transition: all 0.15s ease;
-  }
-
-  .co-search-input:focus {
-    border-color: #0D6E4F;
-    box-shadow: 0 0 0 3px rgba(13,110,79,0.08);
-  }
-
-  .co-search-icon {
-    position: absolute;
-    left: 15px;
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: 17px;
-    color: #9ca3af;
-    pointer-events: none;
-  }
-
-  .co-search-clear {
-    position: absolute;
-    right: 12px;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 27px;
-    height: 27px;
-    border-radius: 50%;
-    border: none;
-    background: #f3f4f6;
-    color: #6b7280;
-    cursor: pointer;
-    font-size: 12px;
-  }
-
-  .co-search-clear:hover {
-    background: #e5e7eb;
-  }
-
-  .co-search-info {
+  .co-products-header {
     display: flex;
-    align-items: center;
     justify-content: space-between;
-    min-height: 22px;
-    margin-bottom: 12px;
-    font-size: 12px;
-    color: #6b7280;
+    align-items: center;
+    margin-bottom: 16px;
   }
 
-  /* MEDICINE GRID */
+  .co-products-title {
+    margin: 0;
+    font-size: 18px;
+    color: #111827;
+  }
 
+  .co-products-count {
+    color: #6b7280;
+    font-size: 13px;
+  }
+
+  /* Medicine Grid */
   .co-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
@@ -126,20 +139,29 @@ const CSS = `
   }
 
   .med-brand {
+    margin: 0 0 4px;
     font-size: 12px;
     font-weight: 600;
     color: #0D6E4F;
-    margin-bottom: 3px;
   }
 
   .med-details {
-    font-size: 11px;
-    color: #6b7280;
-    margin-bottom: 5px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 8px;
   }
 
-  /* CART */
+  .med-tag {
+    background: #f3f4f6;
+    color: #4b5563;
+    border-radius: 6px;
+    padding: 4px 7px;
+    font-size: 10px;
+    font-weight: 600;
+  }
 
+  /* Cart */
   .co-cart {
     position: sticky;
     top: 100px;
@@ -184,7 +206,7 @@ const CSS = `
     margin-top: 20px;
     border: none;
     border-radius: 12px;
-    background: linear-gradient(135deg,#0D6E4F,#16a34a);
+    background: linear-gradient(135deg, #0D6E4F, #16a34a);
     color: white;
     font-weight: 600;
     font-size: 15px;
@@ -199,24 +221,21 @@ const CSS = `
     box-shadow: none;
   }
 
-  /* EMPTY / LOADING */
-
   .co-empty {
-    background: #fff;
-    border: 1.5px solid #e5e7eb;
-    border-radius: 16px;
-    padding: 55px 20px;
+    grid-column: 1 / -1;
     text-align: center;
+    padding: 60px 20px;
+    background: #fff;
+    border: 1.5px dashed #e5e7eb;
+    border-radius: 16px;
     color: #9ca3af;
   }
 
   .co-loading {
-    background: #fff;
-    border: 1.5px solid #e5e7eb;
-    border-radius: 16px;
-    padding: 45px 20px;
+    grid-column: 1 / -1;
     text-align: center;
-    color: #9ca3af;
+    padding: 50px;
+    color: #6b7280;
   }
 
   @media (max-width: 1024px) {
@@ -234,23 +253,19 @@ const CSS = `
       padding: 20px;
     }
 
-    .co-title {
-      font-size: 26px;
-    }
-
     .co-grid {
       grid-template-columns: 1fr;
+    }
+
+    .co-title {
+      font-size: 27px;
     }
   }
 `;
 
 
-/* =========================================================
-   UNIT LABEL
-========================================================= */
-
+/* Human-readable label for unit type */
 function unitLabel(item) {
-
   if (item.unit_type === "carton") {
     return item.carton_name || "Carton";
   }
@@ -263,12 +278,8 @@ function unitLabel(item) {
 }
 
 
-/* =========================================================
-   STOCK BADGE
-========================================================= */
-
+/* Stock badge */
 function StockBadge({ qty }) {
-
   const styles = {
     padding: "4px 8px",
     borderRadius: "6px",
@@ -277,9 +288,7 @@ function StockBadge({ qty }) {
     textTransform: "uppercase"
   };
 
-  const stock = Number(qty || 0);
-
-  if (stock === 0) {
+  if (qty === 0) {
     return (
       <span
         style={{
@@ -293,7 +302,7 @@ function StockBadge({ qty }) {
     );
   }
 
-  if (stock <= 10) {
+  if (qty <= 10) {
     return (
       <span
         style={{
@@ -302,7 +311,7 @@ function StockBadge({ qty }) {
           color: "#ea580c"
         }}
       >
-        Low Stock ({stock})
+        Low Stock ({qty})
       </span>
     );
   }
@@ -321,20 +330,14 @@ function StockBadge({ qty }) {
 }
 
 
-/* =========================================================
-   MEDICINE CARD
-========================================================= */
-
+/* Medicine card */
 function MedCard({ med, onAdd, inCart }) {
-
-  const stock = Number(med.stock_units || 0);
-  const out = stock === 0;
+  const out = Number(med.stock_units) === 0;
 
   return (
     <div className="med-card">
 
-      {/* TOP */}
-
+      {/* Top */}
       <div
         style={{
           display: "flex",
@@ -342,7 +345,6 @@ function MedCard({ med, onAdd, inCart }) {
           alignItems: "flex-start"
         }}
       >
-
         <div
           style={{
             width: "40px",
@@ -358,18 +360,16 @@ function MedCard({ med, onAdd, inCart }) {
           💊
         </div>
 
-        <StockBadge qty={stock} />
-
+        <StockBadge qty={Number(med.stock_units) || 0} />
       </div>
 
 
-      {/* INFORMATION */}
-
+      {/* Medicine information */}
       <div>
 
         <h4
           style={{
-            margin: "0 0 3px",
+            margin: "0 0 4px",
             fontSize: "17px",
             color: "#111827"
           }}
@@ -377,61 +377,59 @@ function MedCard({ med, onAdd, inCart }) {
           {med.name}
         </h4>
 
-
         {med.brand && (
-          <div className="med-brand">
+          <p className="med-brand">
             {med.brand}
-          </div>
+          </p>
         )}
 
+        <div className="med-details">
 
-        {(med.strength || med.form) && (
-          <div className="med-details">
-            {[med.strength, med.form]
-              .filter(Boolean)
-              .join(" • ")}
-          </div>
-        )}
+          {med.strength && (
+            <span className="med-tag">
+              {med.strength}
+            </span>
+          )}
 
+          {med.form && (
+            <span className="med-tag">
+              {med.form}
+            </span>
+          )}
 
-        {med.category && (
-          <div
-            style={{
-              fontSize: "11px",
-              color: "#9ca3af",
-              marginBottom: "5px"
-            }}
-          >
-            {med.category}
-          </div>
-        )}
+          {med.category && (
+            <span className="med-tag">
+              {med.category}
+            </span>
+          )}
 
+        </div>
 
         <p
           style={{
-            margin: 0,
+            margin: "9px 0 0",
             fontSize: "13px",
             color: "#6b7280",
             lineHeight: 1.4,
-            height: "36px",
+            minHeight: "36px",
+            maxHeight: "36px",
             overflow: "hidden"
           }}
         >
-          {med.description || "No description available"}
+          {med.description || "No description available."}
         </p>
 
       </div>
 
 
-      {/* PRICE + ADD */}
-
+      {/* Price + Add */}
       <div
         style={{
           marginTop: "auto",
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
-          gap: "8px"
+          gap: "10px"
         }}
       >
 
@@ -445,22 +443,15 @@ function MedCard({ med, onAdd, inCart }) {
           ₦{Number(med.price || 0).toLocaleString()}
         </span>
 
-
         <button
           className="qty-btn"
           style={{
             width: "auto",
             padding: "0 15px",
             height: "36px",
-            background: inCart
-              ? "#f0fdf6"
-              : "#fff",
-            borderColor: inCart
-              ? "#0D6E4F"
-              : "#e5e7eb",
-            color: inCart
-              ? "#0D6E4F"
-              : "#374151"
+            background: inCart ? "#f0fdf6" : "#fff",
+            borderColor: inCart ? "#0D6E4F" : "#e5e7eb",
+            color: inCart ? "#0D6E4F" : "#374151"
           }}
           onClick={() => onAdd(med)}
           disabled={out || inCart}
@@ -479,235 +470,150 @@ function MedCard({ med, onAdd, inCart }) {
 }
 
 
-/* =========================================================
-   CREATE ORDER
-========================================================= */
-
 function CreateOrder() {
 
-  /*
-  ---------------------------------------------------------
-  IMPORTANT
-
-  We DO NOT load the entire medicines table.
-
-  Medicines are loaded only when the customer searches.
-
-  This is much better for a pharmacy with thousands
-  of medicines.
-  ---------------------------------------------------------
-  */
-
   const [medicines, setMedicines] = useState([]);
-
   const [cart, setCart] = useState([]);
 
   const [loading, setLoading] = useState(false);
 
+  /* Search states */
   const [search, setSearch] = useState("");
-
   const [searching, setSearching] = useState(false);
-
-  const [searchMessage, setSearchMessage] = useState(
-    "Search for a medicine to begin"
-  );
-
-  const token = localStorage.getItem("token");
-
-  const user = JSON.parse(
-    localStorage.getItem("user")
-  );
-
-
-  /*
-  ---------------------------------------------------------
-  SEARCH DEBOUNCE
-  ---------------------------------------------------------
-
-  Prevents an API request on every single keystroke.
-
-  Example:
-
-  User types:
-
-  P
-  Pa
-  Par
-  Para
-
-  Instead of making 4 requests, we wait briefly and
-  search once.
-  ---------------------------------------------------------
-  */
 
   const searchTimer = useRef(null);
 
-
-  useEffect(() => {
-
-    return () => {
-
-      if (searchTimer.current) {
-        clearTimeout(searchTimer.current);
-      }
-
-    };
-
-  }, []);
+  const token = localStorage.getItem("token");
+  const user = JSON.parse(localStorage.getItem("user"));
 
 
   /*
-  =========================================================
-  SEARCH MEDICINES
-  =========================================================
-  */
+    ----------------------------------------------------
+    INITIAL LOAD
+    ----------------------------------------------------
+    IMPORTANT:
+    We still load the medicines when the page opens.
 
-  const searchMedicines = (value) => {
+    This means the user sees the medicine catalogue
+    immediately instead of seeing only a search box.
+  */
+  useEffect(() => {
+    fetchMedicines();
+
+    return () => {
+      if (searchTimer.current) {
+        clearTimeout(searchTimer.current);
+      }
+    };
+  }, []);
+
+
+  /* Load all medicines */
+  const fetchMedicines = async () => {
+    try {
+
+      setSearching(true);
+
+      const res = await API.get("/medicines", {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+
+      setMedicines(res.data || []);
+
+    } catch (err) {
+
+      console.error("Failed to load medicines:", err);
+
+    } finally {
+
+      setSearching(false);
+
+    }
+  };
+
+
+  /*
+    ----------------------------------------------------
+    SEARCH
+    ----------------------------------------------------
+    When search is empty:
+      → show all medicines again.
+
+    When user types:
+      → use existing backend /medicines/search endpoint.
+  */
+  const handleSearch = (value) => {
 
     setSearch(value);
 
     /*
-    Clear previous timer
+      Clear previous timer so we don't send an API
+      request for every single keystroke.
     */
-
     if (searchTimer.current) {
       clearTimeout(searchTimer.current);
     }
 
 
-    const query = value.trim();
-
-
     /*
-    Empty search
+      If search is empty, restore the complete
+      medicine catalogue.
     */
-
-    if (!query) {
-
-      setMedicines([]);
-
-      setSearching(false);
-
-      setSearchMessage(
-        "Search for a medicine to begin"
-      );
-
+    if (!value.trim()) {
+      fetchMedicines();
       return;
     }
 
 
     /*
-    Don't search with just one character.
-
-    This prevents unnecessary database requests.
+      Wait 300ms after the user stops typing.
     */
+    searchTimer.current = setTimeout(async () => {
 
-    if (query.length < 2) {
+      try {
 
-      setMedicines([]);
+        setSearching(true);
 
-      setSearching(false);
-
-      setSearchMessage(
-        "Type at least 2 characters"
-      );
-
-      return;
-    }
-
-
-    /*
-    Wait 300ms after the user stops typing.
-    */
-
-    searchTimer.current = setTimeout(
-      async () => {
-
-        try {
-
-          setSearching(true);
-
-          setSearchMessage("Searching medicines...");
-
-
-          const response = await API.get(
-            `/medicines/search?q=${encodeURIComponent(query)}`,
-            {
-              headers: {
-                Authorization:
-                  `Bearer ${token}`
-              }
+        const res = await API.get(
+          `/medicines/search?q=${encodeURIComponent(value.trim())}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`
             }
-          );
-
-
-          const results =
-            response.data || [];
-
-
-          setMedicines(results);
-
-
-          if (results.length === 0) {
-
-            setSearchMessage(
-              `No medicines found for "${query}"`
-            );
-
-          } else {
-
-            setSearchMessage(
-              `${results.length} medicine${
-                results.length !== 1
-                  ? "s"
-                  : ""
-              } found`
-            );
-
           }
+        );
 
-        } catch (error) {
+        setMedicines(res.data || []);
 
-          console.error(
-            "Medicine search failed:",
-            error
-          );
+      } catch (err) {
 
-          setMedicines([]);
+        console.error("Medicine search failed:", err);
 
-          setSearchMessage(
-            error.response?.data?.message ||
-            "Unable to search medicines"
-          );
+      } finally {
 
-        } finally {
+        setSearching(false);
 
-          setSearching(false);
+      }
 
-        }
-
-      },
-      300
-    );
+    }, 300);
   };
 
 
-  /*
-  =========================================================
-  ADD TO CART
-  =========================================================
-  */
+  /* Clear search */
+  const clearSearch = () => {
+    setSearch("");
+    fetchMedicines();
+  };
 
+
+  /* Add medicine to cart */
   const addToCart = (medicine) => {
 
-    if (
-      cart.find(
-        (item) => item.id === medicine.id
-      )
-    ) {
+    if (cart.find((item) => item.id === medicine.id)) {
       return;
     }
-
 
     setCart([
       ...cart,
@@ -720,26 +626,15 @@ function CreateOrder() {
   };
 
 
-  /*
-  =========================================================
-  UPDATE QUANTITY
-  =========================================================
-  */
-
+  /* Update quantity */
   const updateQty = (id, quantity) => {
-
-    const newQuantity = Math.max(
-      1,
-      Number(quantity)
-    );
-
 
     setCart(
       cart.map((item) =>
         item.id === id
           ? {
               ...item,
-              quantity: newQuantity
+              quantity: Math.max(1, Number(quantity))
             }
           : item
       )
@@ -747,12 +642,7 @@ function CreateOrder() {
   };
 
 
-  /*
-  =========================================================
-  UPDATE UNIT
-  =========================================================
-  */
-
+  /* Change unit type */
   const updateUnit = (id, unit) => {
 
     setCart(
@@ -768,28 +658,20 @@ function CreateOrder() {
   };
 
 
-  /*
-  =========================================================
-  REMOVE FROM CART
-  =========================================================
-  */
-
+  /* Remove from cart */
   const removeFromCart = (id) => {
 
     setCart(
-      cart.filter(
-        (item) => item.id !== id
-      )
+      cart.filter((item) => item.id !== id)
     );
   };
 
 
   /*
-  =========================================================
-  PRICE CALCULATION
-  =========================================================
+    ----------------------------------------------------
+    PRICE CALCULATION
+    ----------------------------------------------------
   */
-
   const getUnitPrice = (item) => {
 
     const unitPrice =
@@ -803,23 +685,19 @@ function CreateOrder() {
 
 
     if (item.unit_type === "carton") {
-
       return (
         unitPrice *
         unitsPerPack *
         packsPerCarton
       );
-
     }
 
 
     if (item.unit_type === "pack") {
-
       return (
         unitPrice *
         unitsPerPack
       );
-
     }
 
 
@@ -827,12 +705,7 @@ function CreateOrder() {
   };
 
 
-  /*
-  =========================================================
-  CART TOTAL
-  =========================================================
-  */
-
+  /* Cart total */
   const total = cart.reduce(
     (sum, item) =>
       sum +
@@ -843,25 +716,18 @@ function CreateOrder() {
 
 
   /*
-  =========================================================
-  PLACE ORDER
-  =========================================================
+    ----------------------------------------------------
+    PLACE ORDER
+    ----------------------------------------------------
   */
-
   const placeOrder = async () => {
 
     if (cart.length === 0) {
-
-      alert(
-        "Please add at least one medicine."
-      );
-
+      alert("Please add at least one medicine to the cart.");
       return;
     }
 
-
     setLoading(true);
-
 
     try {
 
@@ -872,39 +738,29 @@ function CreateOrder() {
 
           items: cart.map((item) => ({
             medicine_id: item.id,
-
             quantity: item.quantity,
-
             unit_type: item.unit_type,
-
             price: getUnitPrice(item)
           }))
         },
         {
           headers: {
-            Authorization:
-              `Bearer ${token}`
+            Authorization: `Bearer ${token}`
           }
         }
       );
 
 
-      alert(
-        "Order placed successfully"
-      );
-
+      alert("Order placed successfully");
 
       setCart([]);
 
-    } catch (error) {
+    } catch (err) {
 
-      console.error(
-        "Order failed:",
-        error
-      );
+      console.error("Order error:", err);
 
       alert(
-        error.response?.data?.message ||
+        err.response?.data?.message ||
         "Order failed"
       );
 
@@ -916,131 +772,99 @@ function CreateOrder() {
   };
 
 
-  /*
-  =========================================================
-  RENDER
-  =========================================================
-  */
-
   return (
+    <div className="co-main">
 
-    <div
-      style={{
-        minHeight: "100vh",
-        background:
-          "linear-gradient(145deg,#f0fdf6 0%,#f8fafc 60%,#eff6ff 100%)"
-      }}
-    >
-
-      <style>
-        {CSS}
-      </style>
+      <style>{CSS}</style>
 
 
-      <main className="co-main">
+      {/* Header */}
+      <div className="co-header">
 
-        {/* HEADER */}
+        <h1 className="co-title">
+          Create New Order
+        </h1>
 
-        <div className="co-header">
+        <p className="co-subtitle">
+          Browse medicines and build your wholesale request
+        </p>
 
-          <h1 className="co-title">
-            Create New Order
-          </h1>
-
-          <p className="co-subtitle">
-            Search medicines and build your
-            wholesale request
-          </p>
-
-        </div>
+      </div>
 
 
-        {/* MAIN LAYOUT */}
-
-        <div className="co-layout">
-
-
-          {/* =================================================
-              LEFT SIDE
+      {/* =================================================
+          SEARCH BAR
           ================================================= */}
+      <div className="co-search-wrapper">
 
-          <div>
+        <span className="co-search-icon">
+          🔍
+        </span>
 
-            {/* SEARCH */}
+        <input
+          type="text"
+          className="co-search"
+          placeholder="Search medicine by name, brand, strength..."
+          value={search}
+          onChange={(e) => handleSearch(e.target.value)}
+        />
 
-            <div className="co-search-wrapper">
+        {search && (
+          <button
+            className="co-search-clear"
+            onClick={clearSearch}
+            title="Clear search"
+          >
+            ✕
+          </button>
+        )}
 
-              <span className="co-search-icon">
-                🔍
-              </span>
+        {searching && (
+          <div className="co-search-status">
+            Searching medicines...
+          </div>
+        )}
 
+        {!searching && search && (
+          <div className="co-search-status">
+            Showing results for "{search}"
+          </div>
+        )}
 
-              <input
-                className="co-search-input"
-                type="text"
-                value={search}
-                onChange={(e) =>
-                  searchMedicines(
-                    e.target.value
-                  )
-                }
-                placeholder="Search medicine, brand, strength..."
-                autoComplete="off"
-              />
-
-
-              {search && (
-
-                <button
-                  className="co-search-clear"
-                  onClick={() =>
-                    searchMedicines("")
-                  }
-                  type="button"
-                >
-                  ✕
-                </button>
-
-              )}
-
-            </div>
+      </div>
 
 
-            {/* SEARCH INFO */}
-
-            <div className="co-search-info">
-
-              <span>
-                {searchMessage}
-              </span>
+      {/* Main layout */}
+      <div className="co-layout">
 
 
-              {searching && (
-                <span>
-                  ⏳
-                </span>
-              )}
+        {/* =================================================
+            MEDICINES
+            ================================================= */}
+        <div className="co-products-section">
 
-            </div>
+          <div className="co-products-header">
+
+            <h2 className="co-products-title">
+              Medicines
+            </h2>
+
+            <span className="co-products-count">
+              {medicines.length}{" "}
+              {medicines.length === 1
+                ? "medicine"
+                : "medicines"}
+            </span>
+
+          </div>
 
 
-            {/* RESULTS */}
+          <div className="co-grid">
 
             {searching ? (
 
               <div className="co-loading">
-
-                <div
-                  style={{
-                    fontSize: "30px",
-                    marginBottom: "8px"
-                  }}
-                >
-                  🔍
-                </div>
-
-                Searching medicines...
-
+                Loading medicines...
               </div>
 
             ) : medicines.length === 0 ? (
@@ -1050,447 +874,43 @@ function CreateOrder() {
                 <div
                   style={{
                     fontSize: "42px",
-                    marginBottom: "10px"
+                    marginBottom: "12px"
                   }}
                 >
                   💊
                 </div>
 
-                <div
+                <h3
                   style={{
-                    fontSize: "15px",
-                    fontWeight: 600,
-                    color: "#374151",
-                    marginBottom: "5px"
+                    margin: "0 0 6px",
+                    color: "#374151"
                   }}
                 >
-                  {search
-                    ? "No medicines found"
-                    : "Search for a medicine"}
-                </div>
+                  No medicines found
+                </h3>
 
-                <div
-                  style={{
-                    fontSize: "13px"
-                  }}
-                >
-                  {search
-                    ? "Try another medicine name, brand or strength."
-                    : "Enter at least 2 characters to search the pharmacy inventory."}
-                </div>
-
-              </div>
-
-            ) : (
-
-              <div className="co-grid">
-
-                {medicines.map(
-                  (medicine) => (
-
-                    <MedCard
-                      key={medicine.id}
-                      med={medicine}
-                      onAdd={addToCart}
-                      inCart={cart.find(
-                        (item) =>
-                          item.id ===
-                          medicine.id
-                      )}
-                    />
-
-                  )
-                )}
-
-              </div>
-
-            )}
-
-          </div>
-
-
-          {/* =================================================
-              CART
-          ================================================= */}
-
-          <div className="co-cart">
-
-            <h3
-              style={{
-                margin: "0 0 20px",
-                display: "flex",
-                alignItems: "center",
-                gap: "10px"
-              }}
-            >
-
-              🛒 Your Cart
-
-              <span
-                style={{
-                  background: "#0D6E4F",
-                  color: "#fff",
-                  padding: "2px 8px",
-                  borderRadius: "20px",
-                  fontSize: "12px"
-                }}
-              >
-                {cart.length}
-              </span>
-
-            </h3>
-
-
-            {cart.length === 0 ? (
-
-              <div
-                style={{
-                  textAlign: "center",
-                  padding: "40px 0",
-                  color: "#9ca3af"
-                }}
-              >
-
-                <div
-                  style={{
-                    fontSize: "40px",
-                    marginBottom: "10px"
-                  }}
-                >
-                  🛍️
-                </div>
-
-                <p>
-                  Your cart is empty
+                <p style={{ margin: 0 }}>
+                  Try searching for another medicine,
+                  brand, or strength.
                 </p>
 
               </div>
 
             ) : (
 
-              <>
+              medicines.map((medicine) => (
 
-                {/* CART ITEMS */}
+                <MedCard
+                  key={medicine.id}
+                  med={medicine}
+                  onAdd={addToCart}
+                  inCart={cart.find(
+                    (item) =>
+                      item.id === medicine.id
+                  )}
+                />
 
-                <div
-                  style={{
-                    maxHeight: "400px",
-                    overflowY: "auto",
-                    paddingRight: "5px"
-                  }}
-                >
-
-                  {cart.map((item) => (
-
-                    <div
-                      key={item.id}
-                      className="cart-item"
-                    >
-
-                      {/* ITEM NAME */}
-
-                      <div
-                        style={{
-                          display: "flex",
-                          justifyContent:
-                            "space-between"
-                        }}
-                      >
-
-                        <div>
-
-                          <strong
-                            style={{
-                              fontSize: "14px",
-                              color: "#111827"
-                            }}
-                          >
-                            {item.name}
-                          </strong>
-
-
-                          {item.brand && (
-
-                            <div
-                              style={{
-                                fontSize: "11px",
-                                color: "#0D6E4F",
-                                fontWeight: 600,
-                                marginTop: "2px"
-                              }}
-                            >
-                              {item.brand}
-                            </div>
-
-                          )}
-
-                        </div>
-
-
-                        <button
-                          onClick={() =>
-                            removeFromCart(
-                              item.id
-                            )
-                          }
-                          style={{
-                            background: "none",
-                            border: "none",
-                            color: "#9ca3af",
-                            cursor: "pointer",
-                            fontSize: "16px"
-                          }}
-                        >
-                          ✕
-                        </button>
-
-                      </div>
-
-
-                      {/* UNIT + QUANTITY */}
-
-                      <div
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent:
-                            "space-between",
-                          marginTop: "5px",
-                          gap: "10px"
-                        }}
-                      >
-
-                        <select
-                          style={{
-                            padding: "5px",
-                            borderRadius: "6px",
-                            border:
-                              "1px solid #e5e7eb",
-                            fontSize: "12px",
-                            outline: "none",
-                            width: "100%"
-                          }}
-                          value={
-                            item.unit_type
-                          }
-                          onChange={(e) =>
-                            updateUnit(
-                              item.id,
-                              e.target.value
-                            )
-                          }
-                        >
-
-                          <option value="unit">
-                            Single Unit — ₦
-                            {Number(
-                              item.price
-                            ).toLocaleString()}
-                          </option>
-
-
-                          <option value="pack">
-                            Full Pack (
-                            {item.units_per_pack ||
-                              1}{" "}
-                            units) — ₦
-                            {(
-                              Number(
-                                item.price
-                              ) *
-                              (Number(
-                                item.units_per_pack
-                              ) || 1)
-                            ).toLocaleString()}
-                          </option>
-
-
-                          <option value="carton">
-                            Wholesale Carton (
-                            {(Number(
-                              item.units_per_pack
-                            ) || 1) *
-                              (Number(
-                                item.packs_per_carton
-                              ) || 1)}{" "}
-                            units) — ₦
-                            {(
-                              Number(
-                                item.price
-                              ) *
-                              (Number(
-                                item.units_per_pack
-                              ) || 1) *
-                              (Number(
-                                item.packs_per_carton
-                              ) || 1)
-                            ).toLocaleString()}
-                          </option>
-
-                        </select>
-
-
-                        <div
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "12px"
-                          }}
-                        >
-
-                          <button
-                            className="qty-btn"
-                            onClick={() =>
-                              updateQty(
-                                item.id,
-                                item.quantity - 1
-                              )
-                            }
-                          >
-                            -
-                          </button>
-
-
-                          <span
-                            style={{
-                              fontWeight: 600,
-                              fontSize: "14px",
-                              minWidth: "20px",
-                              textAlign: "center"
-                            }}
-                          >
-                            {item.quantity}
-                          </span>
-
-
-                          <button
-                            className="qty-btn"
-                            onClick={() =>
-                              updateQty(
-                                item.id,
-                                item.quantity + 1
-                              )
-                            }
-                          >
-                            +
-                          </button>
-
-                        </div>
-
-                      </div>
-
-
-                      {/* LINE TOTAL */}
-
-                      <div
-                        style={{
-                          textAlign: "right",
-                          fontSize: "12.5px",
-                          color: "#6b7280"
-                        }}
-                      >
-
-                        {item.quantity} ×{" "}
-                        {unitLabel(item)} = ₦
-                        {(
-                          getUnitPrice(item) *
-                          item.quantity
-                        ).toLocaleString()}
-
-                      </div>
-
-                    </div>
-
-                  ))}
-
-                </div>
-
-
-                {/* TOTAL */}
-
-                <div
-                  style={{
-                    marginTop: "20px",
-                    paddingTop: "20px",
-                    borderTop:
-                      "2px dashed #f3f4f6"
-                  }}
-                >
-
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent:
-                        "space-between",
-                      marginBottom: "10px"
-                    }}
-                  >
-
-                    <span
-                      style={{
-                        color: "#6b7280"
-                      }}
-                    >
-                      Subtotal
-                    </span>
-
-                    <span
-                      style={{
-                        fontWeight: 600
-                      }}
-                    >
-                      ₦
-                      {total.toLocaleString()}
-                    </span>
-
-                  </div>
-
-
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent:
-                        "space-between",
-                      fontSize: "18px"
-                    }}
-                  >
-
-                    <span
-                      style={{
-                        fontWeight: 700
-                      }}
-                    >
-                      Total
-                    </span>
-
-                    <span
-                      style={{
-                        fontWeight: 700,
-                        color: "#0D6E4F"
-                      }}
-                    >
-                      ₦
-                      {total.toLocaleString()}
-                    </span>
-
-                  </div>
-
-
-                  {/* PLACE ORDER */}
-
-                  <button
-                    className="place-order-btn"
-                    onClick={placeOrder}
-                    disabled={loading}
-                  >
-                    {loading
-                      ? "Processing..."
-                      : "Confirm & Place Order"}
-                  </button>
-
-                </div>
-
-              </>
+              ))
 
             )}
 
@@ -1498,7 +918,358 @@ function CreateOrder() {
 
         </div>
 
-      </main>
+
+        {/* =================================================
+            CART
+            ================================================= */}
+        <div className="co-cart">
+
+          <h3
+            style={{
+              margin: "0 0 20px",
+              display: "flex",
+              alignItems: "center",
+              gap: "10px"
+            }}
+          >
+            🛒 Your Cart
+
+            <span
+              style={{
+                background: "#0D6E4F",
+                color: "#fff",
+                padding: "2px 8px",
+                borderRadius: "20px",
+                fontSize: "12px"
+              }}
+            >
+              {cart.length}
+            </span>
+
+          </h3>
+
+
+          {cart.length === 0 ? (
+
+            <div
+              style={{
+                textAlign: "center",
+                padding: "40px 0",
+                color: "#9ca3af"
+              }}
+            >
+
+              <div
+                style={{
+                  fontSize: "40px",
+                  marginBottom: "10px"
+                }}
+              >
+                🛍️
+              </div>
+
+              <p>
+                Your cart is empty
+              </p>
+
+            </div>
+
+          ) : (
+
+            <>
+
+              <div
+                style={{
+                  maxHeight: "400px",
+                  overflowY: "auto",
+                  paddingRight: "5px"
+                }}
+              >
+
+                {cart.map((item) => (
+
+                  <div
+                    key={item.id}
+                    className="cart-item"
+                  >
+
+                    {/* Item name */}
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between"
+                      }}
+                    >
+
+                      <div>
+
+                        <strong
+                          style={{
+                            fontSize: "14px",
+                            color: "#111827"
+                          }}
+                        >
+                          {item.name}
+                        </strong>
+
+                        {item.brand && (
+                          <div
+                            style={{
+                              fontSize: "11px",
+                              color: "#0D6E4F",
+                              marginTop: "2px"
+                            }}
+                          >
+                            {item.brand}
+                          </div>
+                        )}
+
+                      </div>
+
+
+                      <button
+                        onClick={() =>
+                          removeFromCart(item.id)
+                        }
+                        style={{
+                          background: "none",
+                          border: "none",
+                          color: "#9ca3af",
+                          cursor: "pointer",
+                          fontSize: "16px"
+                        }}
+                      >
+                        ✕
+                      </button>
+
+                    </div>
+
+
+                    {/* Unit + quantity */}
+                    <div
+                      style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: "10px",
+                        marginTop: "5px"
+                      }}
+                    >
+
+                      <select
+                        style={{
+                          padding: "7px",
+                          borderRadius: "6px",
+                          border: "1px solid #e5e7eb",
+                          fontSize: "12px",
+                          outline: "none",
+                          width: "100%"
+                        }}
+                        value={item.unit_type}
+                        onChange={(e) =>
+                          updateUnit(
+                            item.id,
+                            e.target.value
+                          )
+                        }
+                      >
+
+                        <option value="unit">
+                          Single Unit — ₦
+                          {Number(
+                            item.price
+                          ).toLocaleString()}
+                        </option>
+
+                        <option value="pack">
+                          Full Pack (
+                          {item.units_per_pack || 1}{" "}
+                          units) — ₦
+                          {(
+                            Number(item.price) *
+                            (Number(
+                              item.units_per_pack
+                            ) || 1)
+                          ).toLocaleString()}
+                        </option>
+
+                        <option value="carton">
+                          Wholesale Carton (
+                          {(Number(
+                            item.units_per_pack
+                          ) || 1) *
+                            (Number(
+                              item.packs_per_carton
+                            ) || 1)}{" "}
+                          units) — ₦
+                          {(
+                            Number(item.price) *
+                            (Number(
+                              item.units_per_pack
+                            ) || 1) *
+                            (Number(
+                              item.packs_per_carton
+                            ) || 1)
+                          ).toLocaleString()}
+                        </option>
+
+                      </select>
+
+
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          gap: "12px"
+                        }}
+                      >
+
+                        <button
+                          className="qty-btn"
+                          onClick={() =>
+                            updateQty(
+                              item.id,
+                              item.quantity - 1
+                            )
+                          }
+                        >
+                          -
+                        </button>
+
+                        <span
+                          style={{
+                            fontWeight: 600,
+                            fontSize: "14px",
+                            minWidth: "20px",
+                            textAlign: "center"
+                          }}
+                        >
+                          {item.quantity}
+                        </span>
+
+                        <button
+                          className="qty-btn"
+                          onClick={() =>
+                            updateQty(
+                              item.id,
+                              item.quantity + 1
+                            )
+                          }
+                        >
+                          +
+                        </button>
+
+                      </div>
+
+                    </div>
+
+
+                    {/* Line total */}
+                    <div
+                      style={{
+                        textAlign: "right",
+                        fontSize: "12.5px",
+                        color: "#6b7280"
+                      }}
+                    >
+                      {item.quantity} ×{" "}
+                      {unitLabel(item)} = ₦
+                      {(
+                        getUnitPrice(item) *
+                        item.quantity
+                      ).toLocaleString()}
+                    </div>
+
+                  </div>
+
+                ))}
+
+              </div>
+
+
+              {/* Cart totals */}
+              <div
+                style={{
+                  marginTop: "20px",
+                  paddingTop: "20px",
+                  borderTop: "2px dashed #f3f4f6"
+                }}
+              >
+
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    marginBottom: "10px"
+                  }}
+                >
+
+                  <span
+                    style={{
+                      color: "#6b7280"
+                    }}
+                  >
+                    Subtotal
+                  </span>
+
+                  <span
+                    style={{
+                      fontWeight: 600
+                    }}
+                  >
+                    ₦{total.toLocaleString()}
+                  </span>
+
+                </div>
+
+
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    fontSize: "18px"
+                  }}
+                >
+
+                  <span
+                    style={{
+                      fontWeight: 700
+                    }}
+                  >
+                    Total
+                  </span>
+
+                  <span
+                    style={{
+                      fontWeight: 700,
+                      color: "#0D6E4F"
+                    }}
+                  >
+                    ₦{total.toLocaleString()}
+                  </span>
+
+                </div>
+
+
+                <button
+                  className="place-order-btn"
+                  onClick={placeOrder}
+                  disabled={loading}
+                >
+                  {loading
+                    ? "Processing..."
+                    : "Confirm & Place Order"}
+                </button>
+
+              </div>
+
+            </>
+
+          )}
+
+        </div>
+
+      </div>
 
     </div>
   );
